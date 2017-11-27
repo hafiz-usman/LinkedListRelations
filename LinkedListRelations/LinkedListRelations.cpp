@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <iostream>
 #include <vector>
+#include <assert.h>
 
 using namespace std;
 
@@ -55,6 +56,7 @@ public:
         Node* runner = head;
         for (int i = 1; i < input.size(); i++)
         {
+            assert(input[i] != -1); // we use -1 to indicate failure!
             runner->next = new Node(input[i]);
             runner = runner->next;
         }
@@ -101,8 +103,19 @@ public:
         runner->next = temp;
     }
 
-    Node* findValue(int val)
-    {}
+    Node* findValue(Node* head, int val)
+    {
+        while (head != nullptr)
+        {
+            if (head->val == val)
+            {
+                return head;
+            }
+            head = head->next;
+        }
+        return nullptr;
+    }
+
     Node* deleteValue(int val)
     {}
 };
@@ -121,7 +134,7 @@ public:
     {}
     void insertAtTail(NodeDouble* head, int val)
     {}
-    NodeDouble* findValue(int val)
+    NodeDouble* findValue(NodeDouble* head, int val)
     {}
     NodeDouble* deleteValue(int val)
     {}
@@ -142,25 +155,102 @@ public:
     NodeDouble* clone(NodeDouble* head);
 };
 
+void testFindSingleLinkedList(SingleLinkedListOperations& sllo, vector<Node*>& headList, int val)
+{
+    vector<vector<bool>> toFind(headList.size(), vector<bool>(val + 2, false));
+    for (int i = 0; i < toFind.size(); i++)
+    {
+        for (int j = 0; j < toFind[i].size(); j++)
+        {
+            Node* temp = sllo.findValue(headList[i], j);
+            if (temp == nullptr)
+            {
+                toFind[i][j] = false;
+            }
+            else
+            {
+                toFind[i][j] = true;
+            }
+        }
+    }
+    for (int i = 0; i < toFind.size(); i++)
+    {
+        cout << "FindValue for List[" << i << "]:" << endl;
+        for (int j = 0; j < toFind[i].size(); j++)
+        {
+            cout << "  ";
+            cout << "toFind[" << i << "][" << j << "]=" << toFind[i][j] << endl;
+        }
+    }
+}
+
 void testSingleLinkedListOperations(vector<int>& input)
 {
     cout << "TEST SINGLE LL OPERATIONS" << endl;
 
     SingleLinkedListOperations sllo;
-    cout << "Create Single LLs:" << endl;
-    Node* headEmpty = sllo.create(vector<int>());
-    Node* headOne = sllo.create(vector<int>{10});
-    Node* headInput = sllo.create(input);
+    Node* headEmpty = nullptr;
+    Node* headOne = nullptr;
+    Node* headInput = nullptr;
+    const int headOneValue = input.back() + 1;
+    int val = headOneValue + 1;
+    vector<Node*> headList;
 
-    cout << "Print Single LLs:" << endl;
+    cout << "Create Single LLs (set 1):" << endl;
+    Node* headEmpty1 = sllo.create(vector<int>());
+    Node* headOne1 = sllo.create(vector<int>{headOneValue});
+    Node* headInput1 = sllo.create(input);
+    headEmpty = headEmpty1;
+    headOne = headOne1;
+    headInput = headInput1;
+    cout << "Print Single LLs (set 1):" << endl;
+    sllo.print(headEmpty);
+    sllo.print(headOne);
+    sllo.print(headInput);
+    val++;
+    cout << "Insert to Head of Single LLs (set 1):" << endl;
+    cout << "Value = " << val << endl;
+    sllo.insertAtHead(headEmpty, val);
+    sllo.insertAtHead(headOne, val);
+    sllo.insertAtHead(headInput, val);
+    cout << "Print Single LLs (set 1):" << endl;
     sllo.print(headEmpty);
     sllo.print(headOne);
     sllo.print(headInput);
 
-    int val;
+    val++;
+    cout << "Create Single LLs (set 2):" << endl;
+    Node* headEmpty2 = sllo.create(vector<int>());
+    Node* headOne2 = sllo.create(vector<int>{headOneValue});
+    Node* headInput2 = sllo.create(input);
+    headEmpty = headEmpty;
+    headOne = headOne;
+    headInput = headInput;
+    cout << "Insert to Tail of Single LLs (set 2):" << endl;
+    cout << "Value = " << val << endl;
+    sllo.insertAtTail(headEmpty, val);
+    sllo.insertAtTail(headOne, val);
+    sllo.insertAtTail(headInput, val);
+    cout << "Print Single LLs (set 2):" << endl;
+    sllo.print(headEmpty);
+    sllo.print(headOne);
+    sllo.print(headInput);
 
-    val = 11;
-    cout << "Insert to Head of Single LLs:" << endl;
+    val++;
+    cout << "Create Single LLs (set 3):" << endl;
+    Node* headEmpty3 = sllo.create(vector<int>());
+    Node* headOne3 = sllo.create(vector<int>{headOneValue});
+    Node* headInput3 = sllo.create(input);
+    headEmpty = headEmpty3;
+    headOne = headOne3;
+    headInput = headInput3;
+    cout << "Insert to Tail of Single LLs (set 3):" << endl;
+    cout << "Value = " << val << endl;
+    sllo.insertAtTail(headEmpty, val);
+    sllo.insertAtTail(headOne, val);
+    sllo.insertAtTail(headInput, val);
+    val++;
+    cout << "Insert to Head of Single LLs (set 3):" << endl;
     cout << "Value = " << val << endl;
     sllo.insertAtHead(headEmpty, val);
     sllo.insertAtHead(headOne, val);
@@ -170,25 +260,52 @@ void testSingleLinkedListOperations(vector<int>& input)
     sllo.print(headOne);
     sllo.print(headInput);
 
-    val = 12;
-    cout << "Create Single LLs (set 2):" << endl;
-    Node* headEmpty2 = sllo.create(vector<int>());
-    Node* headOne2 = sllo.create(vector<int>{10});
-    Node* headInput2 = sllo.create(input);
-    cout << "Insert to Tail of Single LLs (set 2):" << endl;
+    val++;
+    cout << "Create Single LLs (set 4):" << endl;
+    Node* headEmpty4 = sllo.create(vector<int>());
+    Node* headOne4 = sllo.create(vector<int>{headOneValue});
+    Node* headInput4 = sllo.create(input);
+    headEmpty = headEmpty4;
+    headOne = headOne4;
+    headInput = headInput4;
+    cout << "TEST FIND" << endl;
+    headList.clear();
+    headList.push_back(headEmpty);
+    headList.push_back(headOne);
+    headList.push_back(headInput);
+    testFindSingleLinkedList(sllo, headList, val);
+    cout << "Insert to Tail of Single LLs (set 4):" << endl;
     cout << "Value = " << val << endl;
-    sllo.insertAtTail(headEmpty2, val);
-    sllo.insertAtTail(headOne2, val);
-    sllo.insertAtTail(headInput2, val);
+    sllo.insertAtTail(headEmpty, val);
+    sllo.insertAtTail(headOne, val);
+    sllo.insertAtTail(headInput, val);
+    cout << "TEST FIND" << endl;
+    headList.clear();
+    headList.push_back(headEmpty);
+    headList.push_back(headOne);
+    headList.push_back(headInput);
+    testFindSingleLinkedList(sllo, headList, val);
+    val++;
+    cout << "Insert to Head of Single LLs (set 4):" << endl;
+    cout << "Value = " << val << endl;
+    sllo.insertAtHead(headEmpty, val);
+    sllo.insertAtHead(headOne, val);
+    sllo.insertAtHead(headInput, val);
     cout << "Print Single LLs:" << endl;
-    sllo.print(headEmpty2);
-    sllo.print(headOne2);
-    sllo.print(headInput2);
+    sllo.print(headEmpty);
+    sllo.print(headOne);
+    sllo.print(headInput);
+    cout << "TEST FIND" << endl;
+    headList.clear();
+    headList.push_back(headEmpty);
+    headList.push_back(headOne);
+    headList.push_back(headInput);
+    testFindSingleLinkedList(sllo, headList, val);
 }
 
 int main()
 {
-    vector<int> input{1,2,3,4,5,6,7,8,9,};
+    vector<int> input{1,2,3,4,};
     cout << "ORIGINAL:" << endl;
     cout << "  ";
     for (auto a : input)
