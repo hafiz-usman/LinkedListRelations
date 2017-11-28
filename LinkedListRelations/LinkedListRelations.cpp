@@ -116,8 +116,42 @@ public:
         return nullptr;
     }
 
-    Node* deleteValue(int val)
-    {}
+    Node* deleteValue(Node* head, int val)
+    {
+        if (head == nullptr)
+        {
+            return nullptr;
+        }
+
+        Node* prev = nullptr;
+        Node* current = head;
+        while (current != nullptr)
+        {
+            if (current->val == val)
+            {
+                break;
+            }
+            prev = current;
+            current = current->next;
+        }
+
+        if (current == nullptr)
+        {
+            // value wasn't found
+            return nullptr;
+        }
+
+        if (prev == nullptr)
+        {
+            // delete head
+            head = head->next;
+            delete current;
+            return head;
+        }
+        prev->next = current->next;
+        delete current;
+        return head;
+    }
 };
 
 class DoubleLinkedListOperations
@@ -136,7 +170,7 @@ public:
     {}
     NodeDouble* findValue(NodeDouble* head, int val)
     {}
-    NodeDouble* deleteValue(int val)
+    NodeDouble* deleteValue(NodeDouble* head, int val)
     {}
 };
 
@@ -182,6 +216,42 @@ void testFindSingleLinkedList(SingleLinkedListOperations& sllo, vector<Node*>& h
             cout << "toFind[" << i << "][" << j << "]=" << toFind[i][j] << endl;
         }
     }
+}
+
+void testDeleteSingleLinkedList(SingleLinkedListOperations& sllo)
+{
+    const int val = 1;
+    vector<int> input{1, 2, 3};
+    Node* empty = sllo.create(vector<int>{});
+    Node* one = sllo.create(vector<int>{val});
+    Node* three = sllo.create(input);
+
+    Node* list = nullptr;
+    Node* temp = nullptr;
+    // empty list test
+    list = empty;
+    temp = sllo.deleteValue(list, 1);
+    assert(temp == nullptr);
+    // one list test
+    list = one;
+    temp = sllo.deleteValue(list, val - 1);
+    assert(temp == nullptr);
+    temp = sllo.deleteValue(list, val + 1);
+    assert(temp == nullptr);
+    temp = sllo.deleteValue(list, val + 0);
+    assert(temp == nullptr);
+    // three list test
+    list = three;
+    temp = sllo.deleteValue(list, input.front() - 1);
+    assert(temp == nullptr);
+    temp = sllo.deleteValue(list, input.back() + 1);
+    assert(temp == nullptr);
+    temp = sllo.deleteValue(list, input.size());
+    assert(temp == list);
+    temp = sllo.deleteValue(list, input[0]);
+    assert(temp->val == 2);
+    temp = sllo.deleteValue(temp, temp->val);
+    assert(temp == nullptr);
 }
 
 void testSingleLinkedListOperations(vector<int>& input)
@@ -301,6 +371,8 @@ void testSingleLinkedListOperations(vector<int>& input)
     headList.push_back(headOne);
     headList.push_back(headInput);
     testFindSingleLinkedList(sllo, headList, val);
+    cout << "TEST DELETE" << endl;
+    testDeleteSingleLinkedList(sllo);
 }
 
 int main()
