@@ -200,7 +200,6 @@ private:
     const int c_sentinalValue = -1;
 };
 
-
 class DoubleLinkedListOperations
 {
     // menh!
