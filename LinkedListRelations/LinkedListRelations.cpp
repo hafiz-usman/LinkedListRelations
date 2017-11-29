@@ -45,7 +45,8 @@ struct NodeFlatten
 class SingleLinkedList
 {
 public:
-    SingleLinkedList()
+    SingleLinkedList() :
+        _tail(nullptr)
     {
         //create the sentinal node!
         _head = new Node(c_sentinalValue);
@@ -54,6 +55,11 @@ public:
     Node* getHead()
     {
         return _head->next;
+    }
+
+    Node* getTail()
+    {
+        return _tail;
     }
 
     void create(vector<int>& input)
@@ -71,6 +77,7 @@ public:
             runner->next = new Node(input[i]);
             runner = runner->next;
         }
+        _tail = runner;
     }
 
     void print()
@@ -94,8 +101,14 @@ public:
     void insertAtHead(int val)
     {
         Node* temp = new Node(val);
+        if (_head->next == nullptr)
+        {
+            // this is the first node in the list so just quickly keep track of it by making it the _tail
+            _tail = temp;
+        }
         temp->next = _head->next;
         _head->next = temp;
+        
     }
 
     void insertAtTail(int val)
@@ -104,6 +117,7 @@ public:
         if (_head->next == nullptr)
         {
             _head->next = temp;
+            _tail = temp;
             return;
         }
         Node* runner = _head->next;
@@ -112,6 +126,7 @@ public:
             runner = runner->next;
         }
         runner->next = temp;
+        _tail = temp;
     }
 
     Node* findValue(int val)
@@ -128,16 +143,15 @@ public:
         return nullptr;
     }
 
-    Node* deleteValue(int val)
+    void deleteValue(int val)
     {
-        Node* head = _head->next;
-        if (head == nullptr)
+        if (_head->next == nullptr)
         {
-            return nullptr;
+            return;
         }
 
         Node* prev = nullptr;
-        Node* current = head;
+        Node* current = _head->next;
         while (current != nullptr)
         {
             if (current->val == val)
@@ -151,23 +165,38 @@ public:
         if (current == nullptr)
         {
             // value wasn't found
-            return nullptr;
+            return;
         }
 
         if (prev == nullptr)
         {
+            // value was found at head
             // delete head
-            head = head->next;
+            _head->next = _head->next->next;
+            if (current == _tail)
+            {
+                //we're deleting the only node in the list
+                _tail = _head->next;
+            }
             delete current;
-            return head;
+            return;
         }
+
+        // value was found at some node other than head
+        // delete non-head node
         prev->next = current->next;
+        if (current == _tail)
+        {
+            //we're deleting the last node in the list
+            _tail = prev;
+        }
         delete current;
-        return head;
+        return;
     }
 
 private:
     Node* _head;
+    Node* _tail;
     const int c_sentinalValue = -1;
 };
 
@@ -207,9 +236,61 @@ public:
     NodeDouble* clone(NodeDouble* head);
 };
 
-int main()
+void testSingleLLFind()
 {
-    vector<int> input0{ };
+    vector<int> input0{};
+    vector<int> input1{ 1 };
+    vector<int> input4{ 1,2,3,4, };
+
+    Node* empty = nullptr;
+    Node* one = nullptr;
+    Node* four = nullptr;
+    SingleLinkedList* sll = nullptr;
+
+    SingleLinkedList sll0;
+    SingleLinkedList sll1;
+    SingleLinkedList sll4;
+    sll0.create(input0);
+    sll1.create(input1);
+    sll4.create(input4);
+
+    sll = &sll0;
+    assert(sll->getHead() == nullptr);
+    assert(sll->getTail() == nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+
+    sll = &sll1;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 1);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+
+    sll = &sll4;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 4);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) != nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) != nullptr);
+    assert(sll->findValue(5) == nullptr);
+}
+
+void testSingleLLInsertHead()
+{
+    vector<int> input0{};
     vector<int> input1{ 1 };
     vector<int> input4{ 1,2,3,4, };
 
@@ -226,54 +307,307 @@ int main()
     sll1.create(input1);
     sll4.create(input4);
 
-    sll0.print();
-    sll1.print();
-    sll4.print();
+    //sll0.print();
+    //sll1.print();
+    //sll4.print();
 
-    vector<int> toFind;
-    for (int i = -1; i <= input4.size(); i++)
-    {
-        toFind.push_back(i);
-    }
+    val = 10;
+    sll0.insertAtHead(val);
+    sll1.insertAtHead(val);
+    sll4.insertAtHead(val);
+
     sll = &sll0;
-    for (int i = 0; i < toFind.size(); i++)
-    {
-        int v = toFind[i];
-        Node* temp = sll0.findValue(v);
-        assert(temp == nullptr);
-    }
+    assert(sll->getHead()->val == val);
+    assert(sll->getTail()->val == val);
+    assert(sll->findValue(val) != nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+
     sll = &sll1;
-    for (int i = 0; i < toFind.size(); i++)
-    {
-        int v = toFind[i];
-        Node* temp = sll0.findValue(v);
-        if (i == input1[0])
-        {
-            assert(temp != nullptr);
-            assert(temp->val == i);
-        }
-        else
-        {
-            assert(temp == nullptr);
-        }
-    }
+    assert(sll->getHead()->val == val);
+    assert(sll->getTail()->val == 1);
+    assert(sll->findValue(val) != nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+
     sll = &sll4;
-    int j = 0;
-    for (int i = 0; i < toFind.size(); i++)
-    {
-        int v = toFind[i];
-        Node* temp = sll0.findValue(v);
-        if (toFind[i] == input4[j])
-        {
-            assert(temp != nullptr);
-            assert(temp->val == input4[j]);
-            j++;
-        }
-        else
-        {
-            assert(temp == nullptr);
-        }
-    }
+    assert(sll->getHead()->val == val);
+    assert(sll->getTail()->val == 4);
+    assert(sll->findValue(val) != nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) != nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) != nullptr);
+    assert(sll->findValue(5) == nullptr);
+}
+
+void testSingleLLInsertTail()
+{
+    vector<int> input0{};
+    vector<int> input1{ 1 };
+    vector<int> input4{ 1,2,3,4, };
+
+    int val = -1;
+    Node* empty = nullptr;
+    Node* one = nullptr;
+    Node* four = nullptr;
+    SingleLinkedList* sll = nullptr;
+
+    SingleLinkedList sll0;
+    SingleLinkedList sll1;
+    SingleLinkedList sll4;
+    sll0.create(input0);
+    sll1.create(input1);
+    sll4.create(input4);
+
+    //sll0.print();
+    //sll1.print();
+    //sll4.print();
+    val = 10;
+    sll0.insertAtTail(val);
+    sll1.insertAtTail(val);
+    sll4.insertAtTail(val);
+
+    sll = &sll0;
+    assert(sll->getHead()->val == val);
+    assert(sll->getTail()->val == val);
+    assert(sll->findValue(val) != nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+
+    sll = &sll1;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == val);
+    assert(sll->findValue(val) != nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+
+    sll = &sll4;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == val);
+    assert(sll->findValue(val) != nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) != nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) != nullptr);
+    assert(sll->findValue(5) == nullptr);
+}
+
+void testSingleLLDelete()
+{
+    vector<int> input0{};
+    vector<int> input1{ 1 };
+    vector<int> input4{ 1,2,3,4, };
+
+    int val = -1;
+    Node* empty = nullptr;
+    Node* one = nullptr;
+    Node* four = nullptr;
+    SingleLinkedList* sll = nullptr;
+
+    SingleLinkedList sll0;
+    SingleLinkedList sll1;
+    SingleLinkedList sll4;
+    sll0.create(input0);
+    sll1.create(input1);
+    sll4.create(input4);
+
+    //sll0.print();
+    //sll1.print();
+    //sll4.print();
+
+    val = 10;
+    sll0.deleteValue(val);
+    sll1.deleteValue(val);
+    sll4.deleteValue(val);
+
+    sll = &sll0;
+    assert(sll->getHead() == nullptr);
+    assert(sll->getTail() == nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll1;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 1);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll4;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 4);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) != nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) != nullptr);
+    assert(sll->findValue(5) == nullptr);
+
+    val = 5;
+    sll0.deleteValue(val);
+    sll1.deleteValue(val);
+    sll4.deleteValue(val);
+    sll = &sll0;
+    assert(sll->getHead() == nullptr);
+    assert(sll->getTail() == nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll1;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 1);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll4;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 4);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) != nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) != nullptr);
+    assert(sll->findValue(5) == nullptr);
+
+    val = 4;
+    sll0.deleteValue(val);
+    sll1.deleteValue(val);
+    sll4.deleteValue(val);
+    sll = &sll0;
+    assert(sll->getHead() == nullptr);
+    assert(sll->getTail() == nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll1;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 1);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll4;
+    assert(sll->getHead()->val == 1);
+    assert(sll->getTail()->val == 3);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) != nullptr);
+    assert(sll->findValue(2) != nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+
+    val = 1;
+    sll0.deleteValue(val);
+    sll1.deleteValue(val);
+    sll4.deleteValue(val);
+    sll = &sll0;
+    assert(sll->getHead() == nullptr);
+    assert(sll->getTail() == nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll1;
+    assert(sll->getHead() == nullptr);
+    assert(sll->getTail() == nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll = &sll4;
+    assert(sll->getHead()->val == 2);
+    assert(sll->getTail()->val == 3);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) != nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll4.deleteValue(2);
+    assert(sll->getHead()->val == 3);
+    assert(sll->getTail()->val == 3);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) != nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+    sll4.deleteValue(3);
+    assert(sll->getHead() == nullptr);
+    assert(sll->getTail() == nullptr);
+    assert(sll->findValue(-1) == nullptr);
+    assert(sll->findValue(0) == nullptr);
+    assert(sll->findValue(1) == nullptr);
+    assert(sll->findValue(2) == nullptr);
+    assert(sll->findValue(3) == nullptr);
+    assert(sll->findValue(4) == nullptr);
+    assert(sll->findValue(5) == nullptr);
+}
+
+int main()
+{
+    testSingleLLFind();
+    testSingleLLInsertHead();
+    testSingleLLInsertTail();
+    testSingleLLDelete();
 
     return 0;
 }
