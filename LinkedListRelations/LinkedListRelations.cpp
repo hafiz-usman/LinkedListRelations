@@ -1231,14 +1231,19 @@ int main()
 }
 
 //
-// NOTES Section:
-//
 // Sentinal Nodes:
 // https://en.wikipedia.org/wiki/Sentinel_node
+// BENEFITS:
 // Sentinels are used as an alternative over using null as the path terminator in order to get one or more of the following benefits :
 //    Increased speed of operations
 //    Reduced algorithmic complexity and code size
 //    Increased data structure robustness(arguably)
-// However, sentinel nodes rely on shared memory, which requires extra code to avoid data races.This causes sentinel nodes to have poor performance on concurrent systems.
-// Sentinal nodes also allow null to be inserted into the list since it's no longer the list terminator.
+//
+// DRAWBACKS:
+// . Marginally increased algorithmic complexity and code size
+// . If the data structure is accessed concurrently(which means that all nodes being accessed have to be protected at least for “read - only”), 
+//   for a sentinel - based implementation the sentinel node has to be protected for “read - write” by a mutex. This extra mutex in quite a few 
+//   use scenarios can cause severe performance degradation[1].One way to avoid it is to protect the list structure as a whole for “read - write”,
+//   whereas in the version with NULL it suffices to protect the data structure as a whole for “read - only”(if an update operation will not follow).
+// . The sentinel concept is not useful for the recording of the data structure on disk.
 //
